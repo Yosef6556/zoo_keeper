@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="https://cdn.jsdelivr.net/npm/axios@1.1.2/dist/axios.min.js"></script>
+     <link rel="stylesheet" href="db.json">
+</head>
+
+<body>
+    animol name:<input id="aname"><br><br>
+    animol family:<input id="afamily"><br><br>
+    animol lges:<input id="alges"><br><br>
+    animol food:<input id="afood"><br><br>
+    <button onclick="addnewan()">add now animol</button><br><br>
+    <!-- <button onclick="updatdata()">update</button><br><br> -->
+    <button onclick="getdata()">get info</button><br><br>
+    <div id="display"></div>
+    <script>
+        // create
+        const addnewan = async () => {
+            const resu = await axios.post("http://localhost:3000/animol", { name: aname.value, family: afamily.value, lges: alges.value, food: afood.value })
+        }
+        // read
+        const getdata = async () => {
+            const res = await axios.get("http://localhost:3000/animol")
+            // console.log(res);
+            display.innerHTML = res.data.map(an => ` <button onclick="delStu(${an.id})">del - ${an.id}</button> id: ${an.id},  name: ${an.name},  family: ${an.family},  lges:</h1 ${an.lges},  <h1>food: ${an.food}<br>`).join('')
+        }
+        // update
+        const updatdata = () => axios.put("http://localhost:3000/animol", { name: "dfhsdf", email: "yoseff.@h.com", age: 33 })
+
+        // delete
+        const delStu = (id) => axios.delete(`http://localhost:3000/animol/${id}`)
+
+
+    </script>
+</body>
+
+</html>
