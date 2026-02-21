@@ -39,7 +39,15 @@
     }
     .upload-area:hover { background: rgba(240,192,64,0.07); border-color: #f0c040; }
     .upload-area input[type="file"] { display: none; }
-    .upload-area label { cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 10px; }
+    .upload-area label {
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      width: 100%;
+      height: 100%;
+    }
     .upload-icon { font-size: 2.5rem; }
     .upload-text { color: #f0c040; font-size: 1.05rem; font-weight: bold; }
     .upload-hint { color: #999; font-size: 0.88rem; }
@@ -79,7 +87,7 @@
     }
     .chat-msg { margin-bottom: 14px; display: flex; flex-direction: column; }
     .chat-msg.user .bubble { background: #f0c04022; border: 1px solid #f0c04044; align-self: flex-start; border-radius: 12px 12px 12px 2px; }
-    .chat-msg.ai .bubble { background: rgba(255,255,255,0.06); border: 1px solid #ffffff22; align-self: flex-end; border-radius: 12px 12px 2px 12px; }
+    .chat-msg.ai .bubble { background: rgba(255,255,255,0.06); border: 1px solid #ffffff22; align-self: flex-end; border-radius: 12px 2px 12px 12px; }
     .bubble { padding: 10px 14px; max-width: 85%; font-size: 0.97rem; line-height: 1.6; white-space: pre-wrap; }
     .bubble-label { font-size: 0.78rem; color: #888; margin-bottom: 3px; }
     .chat-input-row { display: flex; gap: 10px; }
@@ -107,8 +115,8 @@
   <p class="subtitle">העלה שרטוט של הדירה שלך וקבל המלצות מותאמות אישית להרחבה</p>
 
   <div class="card">
-    <div class="upload-area" onclick="document.getElementById('file-input').click()">
-      <label>
+    <div class="upload-area">
+      <label for="file-input">
         <input type="file" id="file-input" accept="image/*" />
         <span class="upload-icon">📐</span>
         <span class="upload-text">לחץ להעלאת שרטוט הדירה</span>
@@ -119,7 +127,7 @@
     <div class="question-area">
       <textarea id="user-question" placeholder="מה תרצה לדעת? לדוגמה: אילו קירות ניתן להרוס? איך אפשר להרחיב את הסלון?"></textarea>
     </div>
-    <button class="analyze-btn" id="analyze-btn" disabled onclick="analyzeImage()">🔍 נתח את השרטוט</button>
+    <button class="analyze-btn" id="analyze-btn" disabled>🔍 נתח את השרטוט</button>
     <div class="loader" id="loader">⏳ מנתח את השרטוט, אנא המתן...</div>
     <div class="error-msg" id="error-msg"></div>
   </div>
@@ -164,6 +172,8 @@
       reader.readAsDataURL(file);
     });
 
+    document.getElementById('analyze-btn').addEventListener('click', analyzeImage);
+
     async function analyzeImage() {
       const question = document.getElementById('user-question').value.trim() ||
         'אנא נתח את שרטוט הדירה הזה ותן המלצות מפורטות כיצד ניתן להרחיב אותה. כלול: קירות שניתן להרוס, תוספות אפשריות, שיפורים לתכנון המרחב, והערכת עלויות כללית.';
@@ -173,7 +183,7 @@
       const body = {
         contents: [{ parts: [
           { inlineData: { mimeType: imageMimeType, data: base64Image } },
-          { text: `אתה אדריכל ומומחה לשיפוץ דירות. ${question}` }
+          { text: 'אתה אדריכל ומומחה לשיפוץ דירות. ' + question }
         ]}],
         generationConfig: { temperature: 0.7, maxOutputTokens: 2048 }
       };
@@ -205,7 +215,7 @@
       conversationHistory.push({ role: 'user', text: msg });
       const parts = [
         { inlineData: { mimeType: imageMimeType, data: base64Image } },
-        ...conversationHistory.map(m => ({ text: `${m.role === 'user' ? 'משתמש' : 'אדריכל'}: ${m.text}` }))
+        ...conversationHistory.map(m => ({ text: (m.role === 'user' ? 'משתמש' : 'אדריכל') + ': ' + m.text }))
       ];
       const body = { contents: [{ parts }], generationConfig: { temperature: 0.7, maxOutputTokens: 1024 } };
       try {
@@ -226,8 +236,8 @@
     function addChatBubble(role, text) {
       const history = document.getElementById('chat-history');
       const msg = document.createElement('div');
-      msg.className = `chat-msg ${role}`;
-      msg.innerHTML = `<div class="bubble-label">${role === 'user' ? '👤 אתה' : '🤖 סוכן'}</div><div class="bubble">${text}</div>`;
+      msg.className = 'chat-msg ' + role;
+      msg.innerHTML = '<div class="bubble-label">' + (role === 'user' ? '👤 אתה' : '🤖 סוכן') + '</div><div class="bubble">' + text + '</div>';
       history.appendChild(msg);
       history.scrollTop = history.scrollHeight;
     }
